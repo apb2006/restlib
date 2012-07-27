@@ -1,0 +1,9 @@
+<form class="well form-inline">
+	<fieldset>
+		<legend>Register</legend>
+		<input type="text" class="input-small" placeholder="Email"/>
+		<input type="password" class="input-small" placeholder="Password"/>
+		
+	</fieldset>
+	<button type="submit" class="btn btn-primary">Register</button>
+</form>

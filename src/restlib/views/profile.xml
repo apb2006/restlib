@@ -1,0 +1,15 @@
+<form class="well form-inline">
+<fieldset>
+   <legend>Profile</legend>
+   <label for="theme">Ace theme</label>
+<select id="theme" name="type" >
+                <option>textmate</option>
+                <option>xml</option>
+                <option>html</option>
+                <option>css</option>
+                <option>dot</option>
+              </select>
+
+    </fieldset>
+	    <button type="submit" class="btn btn-primary">Update</button>
+</form>

@@ -1,0 +1,13 @@
+<form class="well form-inline">
+<fieldset>
+   <legend>Login</legend>
+    <input type="text" class="input-small" placeholder="Email"/>
+    <input type="password" class="input-small" placeholder="Password"/>
+    <label class="checkbox">
+    <input type="checkbox"/> Remember me
+    </label>
+    
+    </fieldset>
+	<button type="submit" class="btn btn-primary">Sign in</button>
+	Or <a href="register">Register</a>
+</form>
