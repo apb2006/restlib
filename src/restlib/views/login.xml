@@ -8,6 +8,8 @@
     </label>
     
     </fieldset>
+     <div class="form-actions">
 	<button type="submit" class="btn btn-primary">Sign in</button>
-	Or <a href="register">Register</a>
+	Or <a href="auth/register">Register</a>
+	</div>
 </form>

@@ -1,3 +1,5 @@
 #/bin/sh
-cp -r src/* /home/andy/usr/basex.7/http/
-echo copied to /home/andy/usr/basex.7/http/
+
+rsync --verbose  --progress --stats --compress  \
+      --recursive --times --perms --links --delete \
+        src/* /home/andy/usr/basex.7/http/
