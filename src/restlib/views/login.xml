@@ -1,4 +1,5 @@
 <form class="well form-inline">
+<div id="flash"/>
 <fieldset>
    <legend>Login</legend>
     <input type="text" class="input-small" placeholder="Email"/>

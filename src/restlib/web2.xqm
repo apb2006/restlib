@@ -84,6 +84,40 @@ declare function layout2($template,$map) {
                        ,$page}     
 };
 (:~
+: update template from map
+: flash is put to session old is used
+: @return updated doc with xsltforms processing instructions
+:)
+declare function layout3($template,$map,$req) {
+    let $fnew:=map:get($map,"flash")
+    let $fnew:=if(fn:empty($fnew))
+               then <div/>
+               else $fnew
+    let $flast:=session-get($req,"flash","<div>EMPTY</div>")
+    let $old:= try{
+                 fn:parse-xml($flast)
+               }catch * {
+               <div>erro: {$flast}</div>
+               }
+    let $junk:=request:set-attribute($req,"flash",fn:serialize($fnew))
+
+    let $map:=map:new(($map,map{"flash":=$old})) 
+    
+    return copy $page := $template
+    modify (
+       for $m in map:keys($map)
+       let $v:=$map($m)
+       return
+       if(fn:starts-with($m,"="))
+       then replace value of node  $page//*[@id=fn:substring($m,2)] with $v       
+       else  insert node $v into  $page//*[@id=$m]          
+        )
+      return document { if(map:contains($map, "model"))
+                        then $web:forms-pi
+                        else ()
+                       ,$page}     
+};
+(:~
 : updating version of layout
 :)
 declare updating function output($template,$map) {
@@ -168,17 +202,12 @@ declare function cookies($cookie as element(cookie)) as element(http:header)
 :)
 declare function flash($req,$type as xs:string,$msg as xs:string){
 	let $f:=request:get-attribute($req,"flash")
-	let $x:=if(fn:empty($f))
-			then <div/>
-			else fn:parse-xml($f)
-	let $target:=fn:head(($x/ul[@class=$type],$x))       
-	let $insert:=if($target/self::ul)
-			then <li>{$msg}</li>
-			else  <ul class="{$type}"><li>{$msg}</li></ul>       
-	let $r:=copy $r:=$x
-			modify insert node $insert into $target
-			return $r
-	return request:set-attribute($req,"flash",fn:serialize($r))
+	let $add:=<ul class="{$type}"><li>{$msg}</li></ul>
+	let $new:=if(fn:empty($f))
+			  then <div>{$add}</div>
+			  else  <div>{fn:parse-xml($f)/*,$add}</div>
+
+	return request:set-attribute($req,"flash",fn:serialize($new))
 };
 
 declare function flash2($req,$type as xs:string,$msg as xs:string){
@@ -200,16 +229,17 @@ declare function flash2($req,$type as xs:string,$msg as xs:string){
 : session value with default
 :)
 declare function session-get($req,$name as xs:string,$default as xs:string){
-	let $f:=request:get-attribute($req,"name")
+	let $f:=request:get-attribute($req,$name)
     return if(fn:empty($f))
         then $default
         else $f
 };
+
 (:~
 : update session value using function
 :)
 declare function session-update($req,$name as xs:string,$default as xs:string,$fn){
 	let $f:=session-get($req,$name,$default)
 	let $n:=$fn($f)
-	return ($f,request:set-attribute($req,"name",$n))
+	return ($f,request:set-attribute($req,$name,$n))
 };
