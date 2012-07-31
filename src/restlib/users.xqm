@@ -7,6 +7,41 @@
 module namespace users = 'apb.users.app';
 declare default function namespace 'apb.users.app';
 
-declare function test(){
-"hello"
+declare function find-name($userDb,$username as xs:string)
+{
+    $userDb/users/user[@name=$username]
+};
+
+declare function find-id($userDb,$id as xs:string)
+{
+    $userDb/users/user[@id=$id]
+};
+
+
+declare function next-id($userDb) as xs:integer
+{
+    $userDb/users/@nextid
+};
+
+(:~
+: increment the file id
+:)
+declare updating function incr-id($userDb)
+{
+     replace value of node $userDb/users/@nextid with next-id($userDb)+1
+};
+
+(:~
+: save xq
+:)
+declare updating function create($userDb,
+                              $name as xs:string,
+                              $password as xs:string)
+{    
+     let $d:=<user id="{next-id($userDb)}" created="{fn:current-dateTime()}"
+              name="{$name}" password="{$password}">
+                <ace theme="dawn" />
+     
+        </user>
+    return  (insert node $d into $userDb/users ,incr-id($userDb) )
 };

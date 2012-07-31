@@ -223,7 +223,7 @@ declare function session-flash($req,$fnew){
    let $fnew:=if(fn:empty($fnew))
                then <div/>
                else $fnew
-    let $flast:=session-get($req,"flash","<div>EMPTY</div>")
+    let $flast:=session-get($req,"flash","<div/>")
     let $old:= try{
                  fn:parse-xml($flast)
                }catch * {
