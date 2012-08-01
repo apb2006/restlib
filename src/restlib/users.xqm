@@ -17,7 +17,19 @@ declare function find-id($userDb,$id as xs:string)
     $userDb/users/user[@id=$id]
 };
 
+(:~
+:
+:)
+declare function check-password($userDb,
+                                $username as xs:string,
+                                $password as xs:string)
+{
+    $userDb/users/user[@name=$username and @password=hash:md5($password) ]
+};
 
+(:~
+: next id
+:)
 declare function next-id($userDb) as xs:integer
 {
     $userDb/users/@nextid
@@ -32,16 +44,17 @@ declare updating function incr-id($userDb)
 };
 
 (:~
-: save xq
+: create new user
 :)
 declare updating function create($userDb,
                               $name as xs:string,
                               $password as xs:string)
 {    
      let $d:=<user id="{next-id($userDb)}" created="{fn:current-dateTime()}"
-              name="{$name}" password="{$password}">
+              name="{$name}" password="{hash:md5($password)}">
                 <ace theme="dawn" />
      
         </user>
     return  (insert node $d into $userDb/users ,incr-id($userDb) )
 };
+

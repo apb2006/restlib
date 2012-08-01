@@ -37,10 +37,19 @@ declare
 %rest:form-param("rememberme", "{$rememberme}")
 function login-post($req,$username,$password,$rememberme)
 {
-  let $t:= "post login:" || fn:string-join(($username, $password,$rememberme),",")
-  let $s:="profile not working!"
- 
- return layout(map{"content":= $t,"sidebar":=$s})
+ let $u:=users:check-password($auth:userdb,$username,$password)
+ return 
+     if($u)
+     then
+        let $msg:=web:flash-msg("success","logged in as "|| $username)
+        return (request:set-attribute($req,"flash",fn:serialize($msg)),
+                web:redirect("../.")
+                )
+     else
+        let $msg:=web:flash-msg("error","logged failed")
+        return (request:set-attribute($req,"flash",fn:serialize($msg)),
+                web:redirect("../.")
+                )
  
 };
 
@@ -76,7 +85,7 @@ updating function register-post($req,$username,$password)
         return (
             users:create($auth:userdb,$username,$password),
           (:  request:set-attribute($req,"flash",fn:serialize($msg)), :)
-            db:output(web:redirect("../"))
+            db:output(web:redirect("../../"))
     )
 };
 
