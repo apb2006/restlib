@@ -12,7 +12,7 @@ import module namespace users = 'apb.users.app' at "restlib/users.xqm";
 import module namespace request = "http://exquery.org/ns/restxq/Request";
 declare namespace rest = 'http://exquery.org/ns/restxq';
 declare option db:chop "no";
-declare variable $auth:layout:="xqwebdoc/views/layout.xml";
+declare variable $auth:layout:=fn:resolve-uri("xqwebdoc/views/layout.xml");
 declare variable $auth:userdb:=db:open('xqwebdoc',"users.xml");
 
 
@@ -22,9 +22,8 @@ declare
 %output:method("html5")
 %restxq:request("{$req}")
 function login($req) {
- let $t:= doc("restlib/views/login.xml")
   let $s:="login not working!"
- return layout(map{"content":= $t,"sidebar":=$s})
+  return render(map{"sidebar":=$s},"restlib/views/login.xml")
 };
 
 declare 
@@ -41,12 +40,13 @@ function login-post($req,$username,$password,$rememberme)
  return 
      if($u)
      then
-        let $msg:=web:flash-msg("success","logged in as "|| $username)
+        let $msg:=web:flash-msg("success","Logged in as "|| $username)
         return (request:set-attribute($req,"flash",fn:serialize($msg)),
+                request:set-attribute($req,"uid", $u/@id/fn:string()),
                 web:redirect("../.")
                 )
      else
-        let $msg:=web:flash-msg("error","logged failed")
+        let $msg:=web:flash-msg("error","Logged failed")
         return (request:set-attribute($req,"flash",fn:serialize($msg)),
                 web:redirect("../.")
                 )
@@ -60,10 +60,8 @@ declare
 %restxq:request("{$req}")
 function register($req)
 {
-    let $t:= doc("restlib/views/register.xml")
-    let $s:="register not working!"
-    
-    return layout(map{"content":= $t,"sidebar":=$s})
+    let $s:="register not working!"   
+    return render(map{"sidebar":=$s},"restlib/views/register.xml")
 };
 
 declare 
@@ -79,7 +77,7 @@ updating function register-post($req,$username,$password)
     then 
         let $t:= "User exists!"
         let $s:="POST register not working!"
-        return db:output(layout(map{"content":= $t,"sidebar":=$s}))
+        return db:output(render(map{"content":= $t,"sidebar":=$s}))
     else
         let $msg:=web:flash-msg("info","Created")
         return (
@@ -105,9 +103,8 @@ declare
 %output:method("html5")
 %restxq:request("{$req}")
 function profile($req) {
-  let $t:= doc("restlib/views/profile.xml")
   let $s:="profile not working!"
- return layout(map{"content":= $t,"sidebar":=$s})
+ return render(map{"sidebar":=$s},"restlib/views/profile.xml")
 };
 
 declare 
@@ -118,14 +115,19 @@ declare
 function profile-post($req) {
   let $t:= "post profile"
   let $s:="profile not working!"
- return layout(map{"content":= $t,"sidebar":=$s})
+ return render(map{"content":= $t,"sidebar":=$s})
 };
 
-declare function layout($map) {    
-     web:layout2(doc($auth:layout), $map)    
+declare function render($map) {    
+     web:render(mapfix($map),$auth:layout)
 };
 
-declare function doc($url){
- let $u:=fn:resolve-uri($url)
- return fn:doc($u)
+declare function render($map,$file as xs:string) {    
+     web:render(mapfix($map),$auth:layout,fn:resolve-uri($file))
+};
+
+declare function mapfix($map) {    
+     if(map:contains($map,"sidebar"))
+     then $map
+     else map:new(($map,map{"sidebar":="Authorization..."}))
 };

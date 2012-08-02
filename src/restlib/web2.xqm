@@ -25,14 +25,23 @@ declare variable $web:forms-pi:=(
 );
 
 (:~
-: update template from map @TODO
-: @return updated doc with xsltforms processing instructions
+: template function
+: @return updated doc from map
 :)
-declare function render($file as xs:string,$map as map(*)) as xs:string
+declare function render($map as map(*),$layout as xs:string,$file as xs:string) 
 {
-     let $t:= fn:doc("auth/views/profile.xml")
-    let $s:="profile not working!"
-    return web:layout2(fn:doc("layout.xml"),map{"content":= $t,"sidebar":=$s})
+    let $content:=xquery:invoke($file,$map)
+    let $map:=map:new(($map,map{"content":=$content}))
+    return xquery:invoke($layout,$map)
+};
+
+(:~
+: template function
+: @return updated doc from map
+:)
+declare function render($map as map(*),$layout as xs:string) 
+{
+   xquery:invoke($layout,$map)
 };
 
 (:~
@@ -84,18 +93,17 @@ declare function layout2($template,$map) {
                         else ()
                        ,$page}     
 };
+
 (:~
-: update template from map
-: flash is put to session old is used
-: @return updated doc with xsltforms processing instructions
+: swap flash entry between session and map
+: @return updated map
 :)
-declare function layout3($template,$map,$req) {
+declare function flash-swap($req,$map) {
     let $fnew:=map:get($map,"messages")
     let $old:=session-flash($req,$fnew)    
-    let $map:=map:new(($map,map{"messages":=$old})) 
-    
-    return layout2($template,$map)
+    return map:new(($map,map{"messages":=$old})) 
 };
+
 (:~
 : updating version of layout
 :)
