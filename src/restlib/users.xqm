@@ -12,7 +12,7 @@ declare function find-name($userDb,$username as xs:string)
     $userDb/users/user[@name=$username]
 };
 
-declare function find-id($userDb,$id as xs:string)
+declare function find-id($userDb,$id as xs:string?)
 {
     $userDb/users/user[@id=$id]
 };

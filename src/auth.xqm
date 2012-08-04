@@ -22,7 +22,7 @@ declare
 %output:method("html5")
 %restxq:request("{$req}")
 function login($req) {
-  let $s:="login not working!"
+  let $s:="login here!"
   return render(map{"sidebar":=$s},"restlib/views/login.xml")
 };
 
@@ -46,9 +46,9 @@ function login-post($req,$username,$password,$rememberme)
                 web:redirect("../.")
                 )
      else
-        let $msg:=web:flash-msg("error","Logged failed")
+        let $msg:=web:flash-msg("error","Logged failed, check username and passsword.")
         return (request:set-attribute($req,"flash",fn:serialize($msg)),
-                web:redirect("../.")
+                web:redirect(".")
                 )
  
 };
@@ -79,11 +79,11 @@ updating function register-post($req,$username,$password)
         let $s:="POST register not working!"
         return db:output(render(map{"content":= $t,"sidebar":=$s}))
     else
-        let $msg:=web:flash-msg("info","Created")
+        let $msg:=web:flash-msg("info","Registration successful" || $username)
         return (
             users:create($auth:userdb,$username,$password),
-          (:  request:set-attribute($req,"flash",fn:serialize($msg)), :)
-            db:output(web:redirect("../../"))
+           (: request:set-attribute($req,"flash",fn:serialize($msg)), :)
+            db:output(web:redirect("../."))
     )
 };
 
@@ -126,8 +126,8 @@ declare function render($map,$file as xs:string) {
      web:render(mapfix($map),$auth:layout,fn:resolve-uri($file))
 };
 
-declare function mapfix($map) {    
-     if(map:contains($map,"sidebar"))
-     then $map
-     else map:new(($map,map{"sidebar":="Authorization..."}))
+declare function mapfix($map) {
+ let $default:=map{"sidebar":="Sidebar...",
+                       "usermenu":=()}    
+  return map:new(($default,$map))  
 };

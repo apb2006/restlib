@@ -44,55 +44,7 @@ declare function render($map as map(*),$layout as xs:string)
    xquery:invoke($layout,$map)
 };
 
-(:~
-: update template from map
-: @return updated doc with xsltforms processing instructions
-:)
-declare function layout($template,$map) {
-    copy $page := $template
-    modify (
-       for $m in map:keys($map)
-       let $v:=$map($m)
-       return
 
-       if("title"=$m)
-       then   replace value of node  $page//*[@id="title"] with $v
-       
-       else if("model"=$m)
-       then   insert node $v into $page//*[@id="head"] 
-        
-       else if("content"=$m)
-       then   insert node $v into  $page//*[@id="content"]
-       
-	   else if("sidebar"=$m)
-       then   insert node $v into  $page//*[@id="sidebar"]      	   
-       else ()
-        )
-      return document { if(map:contains($map, "model"))
-                        then $web:forms-pi
-                        else ()
-                       ,$page}     
-};
-
-(:~
-: update template from map
-: @return updated doc with xsltforms processing instructions
-:)
-declare function layout2($template,$map) {
-    copy $page := $template
-    modify (
-       for $m in map:keys($map)
-       let $v:=$map($m)
-       return
-       if(fn:starts-with($m,"="))
-       then replace value of node  $page//*[@id=fn:substring($m,2)] with $v       
-       else  insert node $v into  $page//*[@id=$m]          
-        )
-      return document { if(map:contains($map, "model"))
-                        then $web:forms-pi
-                        else ()
-                       ,$page}     
-};
 
 (:~
 : swap flash entry between session and map
@@ -104,12 +56,6 @@ declare function flash-swap($req,$map) {
     return map:new(($map,map{"messages":=$old})) 
 };
 
-(:~
-: updating version of layout
-:)
-declare updating function output($template,$map) {
- db:output(layout($template,$map))
-};
 
 (:~
 : show an image as a 404
