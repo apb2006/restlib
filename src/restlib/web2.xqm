@@ -1,5 +1,6 @@
 (:~ 
 :  web application utilities
+: privides templates, users, http utils 
 : @author andy bunce
 : @since apr 2012
 :)
@@ -31,7 +32,7 @@ declare variable $web:forms-pi:=(
 declare function render($map as map(*),$layout as xs:string,$file as xs:string) 
 {
     let $content:=xquery:invoke($file,$map)
-    let $map:=map:new(($map,map{"content":=$content}))
+    let $map:=map:new(($map,map{"body":=$content}))
     return xquery:invoke($layout,$map)
 };
 
@@ -185,4 +186,18 @@ declare function session-flash($req,$fnew){
                }
     let $junk:=request:set-attribute($req,"flash",fn:serialize($fnew))
     return $old
+};
+
+declare function session-name($req,$userdb) as xs:string{
+    let $uid:=request:get-attribute($req,"uid")
+    return if(fn:empty($uid))
+           then "guest"
+           else users:find-id($userdb,$uid)/@name/fn:string()
+};
+
+declare function session-has-role($req,$userdb,$role) as xs:boolean{
+    let $uid:=request:get-attribute($req,"uid")
+    return if(fn:empty($uid))
+           then fn:false()
+           else users:find-id($userdb,$uid)/@role=$role
 };

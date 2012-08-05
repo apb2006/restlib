@@ -23,7 +23,7 @@ declare
 %restxq:request("{$req}")
 function login($req) {
   let $s:="login here!"
-  return render(map{"sidebar":=$s},"restlib/views/login.xml")
+  return render($req,map{"sidebar":=$s},"restlib/views/login.xml")
 };
 
 declare 
@@ -48,7 +48,7 @@ function login-post($req,$username,$password,$rememberme)
      else
         let $msg:=web:flash-msg("error","Logged failed, check username and passsword.")
         return (request:set-attribute($req,"flash",fn:serialize($msg)),
-                web:redirect(".")
+                web:redirect("../.")
                 )
  
 };
@@ -61,7 +61,7 @@ declare
 function register($req)
 {
     let $s:="register not working!"   
-    return render(map{"sidebar":=$s},"restlib/views/register.xml")
+    return render($req,map{"sidebar":=$s},"restlib/views/register.xml")
 };
 
 declare 
@@ -77,7 +77,7 @@ updating function register-post($req,$username,$password)
     then 
         let $t:= "User exists!"
         let $s:="POST register not working!"
-        return db:output(render(map{"content":= $t,"sidebar":=$s}))
+        return db:output(render($req,map{"content":= $t,"sidebar":=$s}))
     else
         let $msg:=web:flash-msg("info","Registration successful" || $username)
         return (
@@ -93,8 +93,11 @@ declare
 %output:method("html5")
 %restxq:request("{$req}")
 function logout($req) {
-    web:logout("../") 
-   
+ let $msg:=web:flash-msg("success","You are now Logged out.")
+ return  (request:set-attribute($req,"uid","-"),
+        (:  request:set-attribute($req,"flash",fn:serialize($msg)), :)
+          web:logout("../")
+         )   
 };
 
 declare 
@@ -104,7 +107,7 @@ declare
 %restxq:request("{$req}")
 function profile($req) {
   let $s:="profile not working!"
- return render(map{"sidebar":=$s},"restlib/views/profile.xml")
+ return render($req,map{"sidebar":=$s},"restlib/views/profile.xml")
 };
 
 declare 
@@ -115,19 +118,20 @@ declare
 function profile-post($req) {
   let $t:= "post profile"
   let $s:="profile not working!"
- return render(map{"content":= $t,"sidebar":=$s})
+ return render($req,map{"content":= $t,"sidebar":=$s})
 };
 
-declare function render($map) {    
-     web:render(mapfix($map),$auth:layout)
+declare function render($req,$map) {    
+     web:render(mapfix($req,$map),$auth:layout)
 };
 
-declare function render($map,$file as xs:string) {    
-     web:render(mapfix($map),$auth:layout,fn:resolve-uri($file))
+declare function render($req,$map,$file as xs:string) {    
+     web:render(mapfix($req,$map),$auth:layout,fn:resolve-uri($file))
 };
 
-declare function mapfix($map) {
+declare function mapfix($req,$map) {
  let $default:=map{"sidebar":="Sidebar...",
-                       "usermenu":=()}    
+                   "usermenu":=(),
+                   "title":=request:path($req)}   
   return map:new(($default,$map))  
 };

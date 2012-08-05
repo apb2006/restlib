@@ -6,6 +6,7 @@
 
 module namespace users = 'apb.users.app';
 declare default function namespace 'apb.users.app';
+import module namespace request = "http://exquery.org/ns/restxq/Request";
 
 declare function find-name($userDb,$username as xs:string)
 {
