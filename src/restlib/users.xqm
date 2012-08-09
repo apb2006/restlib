@@ -6,7 +6,6 @@
 
 module namespace users = 'apb.users.app';
 declare default function namespace 'apb.users.app';
-import module namespace request = "http://exquery.org/ns/restxq/Request";
 
 declare function find-name($userDb,$username as xs:string)
 {
@@ -25,7 +24,7 @@ declare function check-password($userDb,
                                 $username as xs:string,
                                 $password as xs:string)
 {
-    $userDb/users/user[@name=$username and @password=hash:md5($password) ]
+    $userDb/users/user[@name=$username and login/@password=hash:md5($password) ]
 };
 
 (:~
@@ -51,11 +50,22 @@ declare updating function create($userDb,
                               $name as xs:string,
                               $password as xs:string)
 {    
-     let $d:=<user id="{next-id($userDb)}" created="{fn:current-dateTime()}"
-              name="{$name}" password="{hash:md5($password)}">
-                <ace theme="dawn" />
-     
+     let $d:=<user id="{next-id($userDb)}" name="{$name}">
+               <stats created="{fn:current-dateTime()}" last="{fn:current-dateTime()}" logins="1" />
+               <login password="{hash:md5($password)}" role="user" />
+               <data>
+                 <ace theme="dawn" /> 
+               </data>        
         </user>
     return  (insert node $d into $userDb/users ,incr-id($userDb) )
 };
 
+(:~
+: update login stats
+:)
+declare updating function update-stats($userDb,$uid)                           
+{    
+    let $d:= $userDb/users/user[@id=$uid]
+    return  (replace value of node $d/stats/@last with fn:current-dateTime(),
+             replace value of node $d/stats/@logins with 1+$d/stats/@logins)
+};

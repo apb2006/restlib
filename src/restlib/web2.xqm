@@ -188,6 +188,8 @@ declare function session-flash($req,$fnew){
     return $old
 };
 
+(:~ user name or guest
+:)
 declare function session-name($req,$userdb) as xs:string{
     let $uid:=request:get-attribute($req,"uid")
     return if(fn:empty($uid))
@@ -199,5 +201,5 @@ declare function session-has-role($req,$userdb,$role) as xs:boolean{
     let $uid:=request:get-attribute($req,"uid")
     return if(fn:empty($uid))
            then fn:false()
-           else users:find-id($userdb,$uid)/@role=$role
+           else users:find-id($userdb,$uid)/login/@role=$role
 };
