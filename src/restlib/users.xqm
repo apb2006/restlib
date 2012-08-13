@@ -63,7 +63,7 @@ declare updating function create($userDb,
 (:~
 : update login stats
 :)
-declare updating function update-stats($userDb,$uid)                           
+declare updating function update-stats($userDb,$uid as xs:string)                           
 {    
     let $d:= $userDb/users/user[@id=$uid]
     return  (replace value of node $d/stats/@last with fn:current-dateTime(),

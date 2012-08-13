@@ -2,18 +2,18 @@
 	<div>{$messages}</div>
 	<form method="post" action="auth/register" class="well form-horizontal">
 		<fieldset>
-			<legend>Register</legend>
+			<legend>Register for {$app}</legend>
 			<div class="control-group">
 				<label class="control-label" for="username">User name:</label>
 				<div class="controls">
-					<input id="username" name="username" type="text" class="input-small"
+					<input id="username" name="username" type="text" class="input"
 						placeholder="Username" />
 				</div>
 			</div>
 			<div class="control-group">
 				<label class="control-label" for="password">Password:</label>
 				<div class="controls">
-					<input id="password" name="password" type="password" class="input-small"
+					<input id="password" name="password" type="password" class="input"
 						placeholder="Password" />
 				</div>
 			</div>

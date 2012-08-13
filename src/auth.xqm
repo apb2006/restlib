@@ -17,63 +17,68 @@ declare variable $auth:userdb:=db:open('xqwebdoc',"users.xml");
 
 
 declare 
-%rest:path("xqwebdoc/auth/login") 
+%rest:path("{$app}/auth/login") 
 %rest:GET 
 %output:method("html5")
 %restxq:request("{$req}")
-function login($req) {
-  let $s:="login here!"
-  let $map:=web:flash-swap($req,map{"sidebar":=$s})
+function login($req,$app) {
+  let $s:="You will need to register before you can log in!"
+  let $map:=web:flash-swap($req,map{"app":=$app,"sidebar":=$s})
   return render($req,$map,"restlib/views/login.xml")
 };
 
 declare 
-%rest:path("xqwebdoc/auth/login") 
+%rest:path("{$app}/auth/login") 
 %rest:POST 
 %output:method("html5")
 %restxq:request("{$req}")
 %rest:form-param("username", "{$username}")
 %rest:form-param("password", "{$password}")
 %rest:form-param("rememberme", "{$rememberme}")
-function login-post($req,$username,$password,$rememberme)
+updating function login-post($req,$app,$username,$password,$rememberme)
 {
  let $u:=users:check-password($auth:userdb,$username,$password)
  return 
      if($u)
      then
         let $msg:=web:flash-msg("success","Logged in as "|| $username)
-        return (request:set-attribute($req,"flash",fn:serialize($msg)),
+        return (
+		   users:update-stats($auth:userdb,$u/@id), 
+			db:output((request:set-attribute($req,"flash",fn:serialize($msg)),
                 request:set-attribute($req,"uid", $u/@id/fn:string()),
                 web:redirect("../.")
-                )
+                ))
+				)
      else
         let $msg:=web:flash-msg("error","Logged failed, check username and passsword.")
-        return (request:set-attribute($req,"flash",fn:serialize($msg)),
+        return db:output(
+		(request:set-attribute($req,"flash",fn:serialize($msg)),
                 web:redirect("./login")
                 )
+				)
  
 };
 
 declare 
-%rest:path("xqwebdoc/auth/register") 
+%rest:path("{$app}/auth/register") 
 %rest:GET 
 %output:method("html5")
 %restxq:request("{$req}")
-function register($req)
+function register($req,$app)
 {
-    let $s:="register here!"
-     let $map:=web:flash-swap($req,map{"sidebar":=$s})   
+    let $s:="This is where you register."
+     let $map:=web:flash-swap($req,map{"app":=$app,"sidebar":=$s})   
     return render($req,$map,"restlib/views/register.xml")
 };
 
 declare 
-%rest:path("xqwebdoc/auth/register") 
+%rest:path("{$app}/auth/register") 
 %rest:POST 
 %output:method("html5")
 %restxq:request("{$req}")
 %rest:form-param("username", "{$username}")
 %rest:form-param("password", "{$password}")
-updating function register-post($req,$username,$password)
+updating function register-post($req,$app,$username,$password)
 {
     if(users:find-name($auth:userdb,$username))
     then 
@@ -81,7 +86,7 @@ updating function register-post($req,$username,$password)
         let $s:="Choose a different name!"
         return db:output(render($req,map{"content":= $t,"sidebar":=$s}))
     else
-        let $msg:=web:flash-msg("success",$username || "your registration was successful. " 
+        let $msg:=web:flash-msg("success",$username || " your registration was successful. " 
                             || "Please login now! ")
         return (
             users:create($auth:userdb,$username,$password),
@@ -94,38 +99,48 @@ updating function register-post($req,$username,$password)
 };
 
 declare 
-%rest:path("xqwebdoc/auth/logout") 
-%rest:GET 
+%rest:path("{$app}/auth/logout") 
+%rest:POST 
 %output:method("html5")
 %restxq:request("{$req}")
-function logout($req) {
+function logout($req,$app) {
  let $msg:=web:flash-msg("success","You are now Logged out.")
  return  (request:set-attribute($req,"flash",fn:serialize($msg)),
-          request:set-attribute($req,"uid","-"),
+          request:set-attribute($req,"uid",""),
           web:redirect("../.")
          )   
 };
 
 declare 
-%rest:path("xqwebdoc/auth/changepassword") 
+%rest:path("{$app}/auth/changepassword") 
 %rest:GET 
 %output:method("html5")
 %restxq:request("{$req}")
-function changepassword($req) {
+function changepassword($req,$app) {
   let $s:="changepassword not working!"
   let $map:=web:flash-swap($req,map{"sidebar":=$s})   
   return render($req,$map,"restlib/views/changepassword.xml")
 };
 
 declare 
-%rest:path("xqwebdoc/auth/changepassword") 
-%rest:POST 
+%rest:POST %rest:path("{$app}/auth/changepassword") 
 %output:method("html5")
 %restxq:request("{$req}")
-function changepassword-post($req) {
+function changepassword-post($req,$app) {
   let $t:= "post changepassword"
   let $s:="changepassword not working!"
  return render($req,map{"content":= $t,"sidebar":=$s})
+};
+
+declare 
+%rest:path("{$app}/auth/lostpassword") 
+%rest:GET 
+%output:method("html5")
+%restxq:request("{$req}")
+function lostpassword($req,$app) {
+  let $s:="lost password not working!"
+  let $map:=web:flash-swap($req,map{"sidebar":=$s})   
+  return render($req,$map,"restlib/views/lostpassword.xml")
 };
 
 declare function render($req,$map) {    

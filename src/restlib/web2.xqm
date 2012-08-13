@@ -31,9 +31,9 @@ declare variable $web:forms-pi:=(
 :)
 declare function render($map as map(*),$layout as xs:string,$file as xs:string) 
 {
-    let $content:=xquery:invoke($file,$map)
+    let $content:=render($map,$file)
     let $map:=map:new(($map,map{"body":=$content}))
-    return xquery:invoke($layout,$map)
+    return render($map,$layout)
 };
 
 (:~
@@ -42,10 +42,20 @@ declare function render($map as map(*),$layout as xs:string,$file as xs:string)
 :)
 declare function render($map as map(*),$layout as xs:string) 
 {
-   xquery:invoke($layout,$map)
+   let $map:=map:new(($map,map{"partial":=partial($map,$layout,?,?,?)}))
+   return xquery:invoke($layout,$map)
 };
 
-
+(:~
+: template function
+: @return updated doc from map
+:)
+declare function partial($map,$base,$name,$seq,$layout as xs:string) 
+{
+  for $s in $seq
+  let $map:=map:new(($map,map{$name:=$s}))
+  return render($map,fn:resolve-uri($layout,$base))  
+};
 
 (:~
 : swap flash entry between session and map
@@ -107,11 +117,11 @@ declare function logout($url as xs:string)
 declare function xml2html($in)
  {
      (: @TODO better way to get path :)
-     let $xsl:=fn:doc(fn:resolve-uri("restlib/xmlverbatim.xsl"))
+     let $xsl:=fn:resolve-uri("restlib/xmlverbatim.xsl")
      return 
          if(fn:empty($in))
          then ()
-         else xslt:transform($in, $xsl)
+         else  xslt:transform($in, $xsl)  
  };
  
 (:~
