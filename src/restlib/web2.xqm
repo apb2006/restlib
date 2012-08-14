@@ -42,19 +42,19 @@ declare function render($map as map(*),$layout as xs:string,$file as xs:string)
 :)
 declare function render($map as map(*),$layout as xs:string) 
 {
-   let $map:=map:new(($map,map{"partial":=partial($map,$layout,?,?,?)}))
+   let $map:=map:new(($map,map{"partial":=partial(?,?,?,$map,$layout)}))
    return xquery:invoke($layout,$map)
 };
 
 (:~
-: template function
+: partial template function: evaluate part for each value in sequence
 : @return updated doc from map
 :)
-declare function partial($map,$base,$name,$seq,$layout as xs:string) 
+declare function partial($part as xs:string,$name,$seq,$map,$base) 
 {
   for $s in $seq
   let $map:=map:new(($map,map{$name:=$s}))
-  return render($map,fn:resolve-uri($layout,$base))  
+  return render($map,fn:resolve-uri($part,$base))  
 };
 
 (:~
