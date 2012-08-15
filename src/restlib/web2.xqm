@@ -92,7 +92,7 @@ declare function page404($image){
 declare function redirect($url as xs:string) 
  {
         <rest:response>         
-           <http:response status="301" >
+           <http:response status="303" >
              <http:header name="Location" value="{$url}"/>
            </http:response>                      
        </rest:response>
