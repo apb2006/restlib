@@ -8,16 +8,17 @@
 				<label class="control-label" for="username">User name:</label>
 				<div class="controls">
 					<input id="username" name="username" type="text" class="input"
-						 />
+						 required="required" autofocus="autofocus"/>
 				</div>
 			</div>
 			<div class="control-group">
 				<label class="control-label" for="password">Password:</label>
 				<div class="controls">
 					<input id="password" name="password" type="password" class="input"
-						 />
+						 required="required" />
 				</div>
 			</div>
+			
 			<label class="checkbox">
 				<input name="rememberme" type="checkbox" />
 				Remember me (not implemented yet)
