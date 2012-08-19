@@ -70,7 +70,7 @@ declare function flash-swap($req,$map) {
 
 (:~
 : show an image as a 404
-: Adam's 'restxq examples has binary not raw
+: Adam's 'restxq example has binary not raw
 :)
 declare function page404($image){
   <rest:response>
@@ -86,6 +86,26 @@ declare function page404($image){
       file:read-binary($image)
 };
 
+
+declare function response($type){
+(: http://john.snelson.org.uk/interesting-use-case-for-the-xquery-11-switch :)
+    switch(fn:true())
+    case "xml"=$type return response("xml","application/xml") 
+    case "text"=$type return response("text","text/plain")
+    case "html"=$type return response("html","text/html")
+    default return  response("xml","application/xml")             
+};
+
+declare function response($method as xs:string,$mimetype as xs:string){
+    <rest:response>
+           <output:serialization-parameters>
+                <output:method value="{$method}"/>
+           </output:serialization-parameters>
+            <http:response>
+            <http:header name="Content-Type" value="{$mimetype}"/>              
+           </http:response>
+       </rest:response>
+};
 (:~
 : redirect to ..
 :)
@@ -121,7 +141,12 @@ declare function xml2html($in)
      return 
          if(fn:empty($in))
          then ()
-         else  xslt:transform($in, $xsl)  
+         else try{ 
+                    xslt:transform($in, $xsl) 
+              }
+              catch * {
+               <div>Error in xml2html</div>
+              }
  };
  
 (:~
