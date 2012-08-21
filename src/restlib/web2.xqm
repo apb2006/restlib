@@ -33,7 +33,8 @@ declare function render($map as map(*),$layout as xs:string,$file as xs:string)
 {
     let $content:=render($map,$file)
     let $map:=map:new(($map,map{"body":=$content}))
-    return render($map,$layout)
+    return render($map,$layout)  
+	
 };
 
 (:~
@@ -42,8 +43,10 @@ declare function render($map as map(*),$layout as xs:string,$file as xs:string)
 :)
 declare function render($map as map(*),$layout as xs:string) 
 {
+    
    let $map:=map:new(($map,map{"partial":=partial(?,?,?,$map,$layout)}))
-   return xquery:invoke($layout,$map)
+   return xquery:invoke($layout,$map)  
+
 };
 
 (:~
@@ -106,6 +109,18 @@ declare function response($method as xs:string,$mimetype as xs:string){
            </http:response>
        </rest:response>
 };
+
+declare function download($filename as xs:string){
+ <rest:response>
+           <output:serialization-parameters>
+                <output:method value="raw"/>
+           </output:serialization-parameters>
+            <http:response>
+            <http:header name="Content-Disposition" value='attachment;filename="{$filename}"'/>              
+           </http:response>
+       </rest:response>
+};
+
 (:~
 : redirect to ..
 :)
@@ -137,7 +152,7 @@ declare function logout($url as xs:string)
 declare function xml2html($in)
  {
      (: @TODO better way to get path :)
-     let $xsl:=fn:resolve-uri("restlib/xmlverbatim.xsl")
+     let $xsl:=fn:resolve-uri("xmlverbatim.xsl")
      return 
          if(fn:empty($in))
          then ()
@@ -145,7 +160,7 @@ declare function xml2html($in)
                     xslt:transform($in, $xsl) 
               }
               catch * {
-               <div>Error in xml2html</div>
+               <div>Error in xml2html: {$xsl}</div>
               }
  };
  
@@ -227,9 +242,9 @@ declare function session-flash($req,$fnew){
 :)
 declare function session-name($req,$userdb) as xs:string{
     let $uid:=request:get-attribute($req,"uid")
-    return if(fn:empty($uid))
-           then "guest"
-           else users:find-id($userdb,$uid)/@name/fn:string()
+    return if($uid)
+	       then users:find-id($userdb,$uid)/@name/fn:string()
+           else "guest"
 };
 
 declare function session-has-role($req,$userdb,$role) as xs:boolean{
@@ -238,3 +253,4 @@ declare function session-has-role($req,$userdb,$role) as xs:boolean{
            then fn:false()
            else users:find-id($userdb,$uid)/login/@role=$role
 };
+
