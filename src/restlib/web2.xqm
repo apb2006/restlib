@@ -134,6 +134,19 @@ declare function redirect($url as xs:string)
 };
 
 (:~
+: redirect with flash msg
+:)
+declare function redirect($req,$url as xs:string,$msg) 
+ {
+ (request:set-attribute($req,"flash",fn:serialize($msg)),
+    <rest:response>         
+       <http:response status="303" >
+         <http:header name="Location" value="{$url}"/>
+       </http:response>                      
+   </rest:response>
+   )
+};
+(:~
 : logout, clear cookie and redirect to ..
 :)
 declare function logout($url as xs:string) 
