@@ -3,7 +3,7 @@
 	<form method="post" action="auth/login" class="well form-horizontal">
 
 		<fieldset>
-			<legend>Login to {$app}</legend>
+			<legend>Sign in to {$app}</legend>
 			<div class="control-group">
 				<label class="control-label" for="username">User name:</label>
 				<div class="controls">

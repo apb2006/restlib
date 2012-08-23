@@ -64,9 +64,9 @@ declare function partial($part as xs:string,$name,$seq,$map,$base)
 : swap flash entry between session and map
 : @return updated map
 :)
-declare function flash-swap($req,$map) {
+declare function flash-swap($map) {
     let $fnew:=map:get($map,"messages")
-    let $old:=session-flash($req,$fnew)    
+    let $old:=session-flash($fnew)    
     return map:new(($map,map{"messages":=$old})) 
 };
 
@@ -136,9 +136,9 @@ declare function redirect($url as xs:string)
 (:~
 : redirect with flash msg
 :)
-declare function redirect($req,$url as xs:string,$msg) 
+declare function redirect($url as xs:string,$msg) 
  {
- (request:set-attribute($req,"flash",fn:serialize($msg)),
+ (request:update-attribute("flash",fn:serialize($msg)),
     <rest:response>         
        <http:response status="303" >
          <http:header name="Location" value="{$url}"/>
@@ -211,14 +211,14 @@ declare function flash-msg($type as xs:string,$msg as xs:string) as element(div)
 :)
 declare function flash-msg($type as xs:string,$msg as xs:string,$req)
 {
-  session-flash($req,flash-msg($type,$msg))           
+  session-flash(flash-msg($type,$msg))           
 };	   
 
 (:~
 : session value with default
 :)
-declare function session-get($req,$name as xs:string,$default as xs:string){
-	let $f:=request:get-attribute($req,$name)
+declare function session-get($name as xs:string,$default as xs:string){
+	let $f:=request:attribute($name)
     return if(fn:empty($f))
         then $default
         else $f
@@ -227,41 +227,41 @@ declare function session-get($req,$name as xs:string,$default as xs:string){
 (:~
 : update session value using function
 :)
-declare function session-update($req,$name as xs:string,$default as xs:string,$fn){
-	let $f:=session-get($req,$name,$default)
+declare function session-update($name as xs:string,$default as xs:string,$fn){
+	let $f:=session-get($name,$default)
 	let $n:=$fn($f)
-	return ($f,request:set-attribute($req,$name,$n))
+	return ($f,request:update-attribute($name,$n))
 };
 
 (:~
 : update session value flash value
 : @return old
 :)
-declare function session-flash($req,$fnew){
+declare function session-flash($fnew){
    let $fnew:=if(fn:empty($fnew))
                then <div/>
                else $fnew
-    let $flast:=session-get($req,"flash","<div/>")
+    let $flast:=session-get("flash","<div/>")
     let $old:= try{
                  fn:parse-xml($flast)
                }catch * {
                <div>erro: {$flast}</div>
                }
-    let $junk:=request:set-attribute($req,"flash",fn:serialize($fnew))
+    let $junk:=request:update-attribute("flash",fn:serialize($fnew))
     return $old
 };
 
 (:~ user name or guest
 :)
-declare function session-name($req,$userdb) as xs:string{
-    let $uid:=request:get-attribute($req,"uid")
+declare function session-name($userdb) as xs:string{
+    let $uid:=request:attribute("uid")
     return if($uid)
 	       then users:find-id($userdb,$uid)/@name/fn:string()
            else "guest"
 };
 
-declare function session-has-role($req,$userdb,$role) as xs:boolean{
-    let $uid:=request:get-attribute($req,"uid")
+declare function session-has-role($userdb,$role) as xs:boolean{
+    let $uid:=request:attribute("uid")
     return if(fn:empty($uid))
            then fn:false()
            else users:find-id($userdb,$uid)/login/@role=$role
