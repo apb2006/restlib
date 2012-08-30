@@ -3,7 +3,7 @@
 	<form method="post" action="auth/register" class="well form-horizontal"
 	 oninput="up2.setCustomValidity(up2.value != password.value ? 'Passwords do not match.' : '')">
 		<fieldset>
-			<legend>Sign up for {$app}</legend>
+			<legend>Register for {$app}</legend>
 			<div class="control-group">
 				<label class="control-label" for="username">Choose a user name:</label>
 				<div class="controls">
