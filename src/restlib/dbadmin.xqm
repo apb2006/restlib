@@ -14,7 +14,7 @@ declare namespace client="http://basex.org/modules/client";
 : ensure db exists
 :) 
 declare function create($dbname as xs:string,$loadpath as xs:string){
-    let $c := connect()
+   (:
     let $path:=fn:resolve-uri($loadpath)
     let $path:=file:path-to-native($path)
 
@@ -23,9 +23,14 @@ declare function create($dbname as xs:string,$loadpath as xs:string){
 
         if (db:exists($dbname))
         then "Database found."
-        else  fn:string-join((client:execute($c, "SET CHOP FALSE"), 
+        else 
+            	let $c := connect()
+                return				
+		       fn:string-join((client:execute($c, "SET CHOP FALSE"), 
 		       client:execute($c, $cmd),
 			   "Database created.")) 
+			   :)
+		"DO NOT USE."	   
 };
 
 (:~ 

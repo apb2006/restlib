@@ -9,7 +9,8 @@ declare default function namespace 'apb.restlib.auth';
 
 import module namespace web = 'apb.web.utils' at "restlib/web2.xqm";
 import module namespace users = 'apb.users.app' at "restlib/users.xqm";
-import module namespace request = "http://exquery.org/ns/restxq/Request";
+import module namespace request = "http://exquery.org/ns/request";
+import module namespace session = "http://basex.org/modules/session";
 declare namespace rest = 'http://exquery.org/ns/restxq';
 declare option db:chop "no";
 declare variable $auth:layout:=fn:resolve-uri("xqwebdoc/views/layout.xml");
@@ -17,10 +18,8 @@ declare variable $auth:userdb:=db:open('xqwebdoc',"users.xml");
 
 
 declare 
-%rest:path("{$app}/auth/login") 
-%rest:GET 
+%rest:GET %rest:path("{$app}/auth/login") 
 %output:method("html5")
-
 function login($app) {
   let $s:="You will need to register before you can log in!"
   let $map:=web:flash-swap(map{"app":=$app,"sidebar":=$s})
@@ -28,10 +27,8 @@ function login($app) {
 };
 
 declare 
-%rest:path("{$app}/auth/login") 
-%rest:POST 
+%rest:POST %rest:path("{$app}/auth/login") 
 %output:method("html5")
-
 %rest:form-param("username", "{$username}")
 %rest:form-param("password", "{$password}")
 %rest:form-param("rememberme", "{$rememberme}")
@@ -45,7 +42,7 @@ updating function login-post($app,$username,$password,$rememberme)
         return (
 		   users:update-stats($auth:userdb,$u/@id), 
 			db:output((
-                request:update-attribute("uid", $u/@id/fn:string()),
+                session:set("uid", $u/@id/fn:string()),
                 web:redirect("../.",$msg)
                 ))
 				)
@@ -58,10 +55,8 @@ updating function login-post($app,$username,$password,$rememberme)
 };
 
 declare 
-%rest:path("{$app}/auth/register") 
-%rest:GET 
+%rest:GET %rest:path("{$app}/auth/register") 
 %output:method("html5")
-
 function register($app)
 {
     let $s:="This is where you register."
@@ -70,10 +65,8 @@ function register($app)
 };
 
 declare 
-%rest:path("{$app}/auth/register") 
-%rest:POST 
+%rest:POST %rest:path("{$app}/auth/register") 
 %output:method("html5")
-
 %rest:form-param("username", "{$username}")
 %rest:form-param("password", "{$password}")
 updating function register-post($app,$username,$password)
@@ -96,23 +89,19 @@ updating function register-post($app,$username,$password)
 };
 
 declare 
-%rest:path("{$app}/auth/logout") 
-%rest:POST 
+%rest:POST %rest:path("{$app}/auth/logout") 
 %output:method("html5")
-
 function logout($app) {
  let $msg:=web:flash-msg("success","You are now Logged out.")
  return  (
-          request:update-attribute("uid",""),
+          session:set("uid",""),
           web:redirect("../.",$msg)
          )   
 };
 
 declare 
-%rest:path("{$app}/auth/changepassword") 
-%rest:GET 
+%rest:GET %rest:path("{$app}/auth/changepassword") 
 %output:method("html5")
-
 function changepassword($app) {
   let $s:="changepassword not working!"
   let $map:=web:flash-swap(map{"sidebar":=$s})   
@@ -122,7 +111,6 @@ function changepassword($app) {
 declare 
 %rest:POST %rest:path("{$app}/auth/changepassword") 
 %output:method("html5")
-
 function changepassword-post($app) {
   let $t:= "post changepassword"
   let $s:="changepassword not working!"
@@ -130,10 +118,8 @@ function changepassword-post($app) {
 };
 
 declare 
-%rest:path("{$app}/auth/lostpassword") 
-%rest:GET 
+%rest:GET %rest:path("{$app}/auth/lostpassword") 
 %output:method("html5")
-
 function lostpassword($app) {
   let $s:="lost password not working!"
   let $map:=web:flash-swap(map{"sidebar":=$s})   

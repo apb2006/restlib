@@ -7,7 +7,8 @@
 
 module namespace web = 'apb.web.utils';
 declare default function namespace 'apb.web.utils'; 
-import module namespace request = "http://exquery.org/ns/restxq/Request";
+import module namespace request = "http://exquery.org/ns/request";
+import module namespace session = "http://basex.org/modules/session";
 import module namespace users = "apb.users.app" at "users.xqm";
 declare namespace rest = 'http://exquery.org/ns/restxq';
 declare namespace xf = 'http://www.w3.org/2002/xforms';
@@ -138,7 +139,7 @@ declare function redirect($url as xs:string)
 :)
 declare function redirect($url as xs:string,$msg) 
  {
- (request:update-attribute("flash",fn:serialize($msg)),
+ (session:set("flash",fn:serialize($msg)),
     <rest:response>         
        <http:response status="303" >
          <http:header name="Location" value="{$url}"/>
@@ -218,7 +219,7 @@ declare function flash-msg($type as xs:string,$msg as xs:string,$req)
 : session value with default
 :)
 declare function session-get($name as xs:string,$default as xs:string){
-	let $f:=request:attribute($name)
+	let $f:=session:get($name)
     return if(fn:empty($f))
         then $default
         else $f
@@ -230,7 +231,7 @@ declare function session-get($name as xs:string,$default as xs:string){
 declare function session-update($name as xs:string,$default as xs:string,$fn){
 	let $f:=session-get($name,$default)
 	let $n:=$fn($f)
-	return ($f,request:update-attribute($name,$n))
+	return ($f,session:set($name,$n))
 };
 
 (:~
@@ -247,21 +248,21 @@ declare function session-flash($fnew){
                }catch * {
                <div>erro: {$flast}</div>
                }
-    let $junk:=request:update-attribute("flash",fn:serialize($fnew))
+    let $junk:=session:set("flash",fn:serialize($fnew))
     return $old
 };
 
 (:~ user name or guest
 :)
 declare function session-name($userdb) as xs:string{
-    let $uid:=request:attribute("uid")
+    let $uid:=session:get("uid")
     return if($uid)
 	       then users:find-id($userdb,$uid)/@name/fn:string()
            else "guest"
 };
 
 declare function session-has-role($userdb,$role) as xs:boolean{
-    let $uid:=request:attribute("uid")
+    let $uid:=session:get("uid")("uid")
     return if(fn:empty($uid))
            then fn:false()
            else users:find-id($userdb,$uid)/login/@role=$role
