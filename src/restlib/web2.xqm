@@ -153,7 +153,7 @@ declare function redirect($url as xs:string,$msg)
 declare function logout($url as xs:string) 
  {
         <rest:response>         
-           <http:response status="301" >
+           <http:response status="303" >
              <http:header name="Location" value="{$url}"/>
 			 <http:header name="Set-Cookie" value="JSESSIONID=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"/>
            </http:response>                      
@@ -254,17 +254,30 @@ declare function session-flash($fnew){
 
 (:~ user name or guest
 :)
-declare function session-name($userdb) as xs:string{
+declare function session-username($userdb) as xs:string{
     let $uid:=session:get("uid")
     return if($uid)
 	       then users:find-id($userdb,$uid)/@name/fn:string()
-           else "guest"
+           else "(guest)"
 };
 
 declare function session-has-role($userdb,$role) as xs:boolean{
-    let $uid:=session:get("uid")("uid")
+    let $uid:=session:get("uid") 
     return if(fn:empty($uid))
            then fn:false()
            else users:find-id($userdb,$uid)/login/@role=$role
 };
 
+(:~
+: friendly datetime catching missing 
+:)
+declare function format-dateTime($dt as xs:string){
+    try{ 
+        <time class="relative-date" datetime="{$dt}" title="{$dt}">
+        {fn:format-dateTime(xs:dateTime($dt), "[H01]:[m01] on [FNn,*-3], [D01] [MNn,*-3] [Y]")}
+        </time>
+    }
+    catch * {
+        $dt
+    }
+};

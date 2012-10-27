@@ -1,6 +1,7 @@
 # restlib
 
-BaseX RESTXQ common functions. Very experimental. Expect frequent API changes. 
+A Web application framework building on BaseX RESTXQ. 
+Very experimental. Expect frequent API changes. 
 
 ## templating
 
@@ -14,6 +15,12 @@ BaseX RESTXQ common functions. Very experimental. Expect frequent API changes.
 - redirect
 - logout
 - cookies
+
+## user management
+- register
+- login/logout
+- oauth
+- user database
 
 ## session
 - session-get

@@ -27,8 +27,7 @@
 		</fieldset>
 		<div class="form-actions">
 			<button type="submit" class="btn btn-primary">Log in</button>
-			Or
-			<a href="auth/register">Register</a>
+			<div class="pull-right">1st time here? <a href="auth/register">Register</a></div>
 		</div>
 		<a href="auth/lostpassword" class="pull-right">Forgotten your password?</a>
 	</form>
